@@ -1,6 +1,6 @@
 {
   "name": "validate-obj",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "homepage": "http://github.com/ron-liu/validate-obj.js",
   "keywords": [
     "validator",
@@ -29,6 +29,7 @@
   "engines": {
     "node": ">= 0.8"
   },
+  "main": "validate-obj.js",
   "author": "Ron Liu <ronliu2k@gmail.com>",
   "licenses": [
     {
