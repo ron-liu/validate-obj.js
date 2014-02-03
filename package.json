@@ -1,33 +1,39 @@
 {
-	"name": "validate-obj",
-	"version": "0.1.0",
-	"homepage": "http://github.com/ron-liu/validate-obj.js",
-	"keywords": [
-		"validator", "validation", "validate", "form", "object"
-	],
-	"description": "simple way to validate object",
-	"bugs": {
-		"url": "http://github.com/ron-liu/validate-obj/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "http://github.com/ron-liu/validate-obj.js.git"
-	},
-	"scripts": {
-	"test": "./node_modules/.bin/_mocha --reporter spec"
-	},
-	"devDependencies": {
-		"mocha": "latest",
-		"istanbul": "latest",
-		"jshint": "latest",
-		"uglify-js": "latest"
-	},
-	"engines": { "node" : ">= 0.8" },
-	"author": "Ron Liu <ronliu2k@gmail.com>",
-	"licenses": [
-		{
-			"type": "MIT",
-			"url": "http://github.com/chriso/validator.js/raw/master/LICENSE"
-		}
-	]
+  "name": "validate-obj",
+  "version": "0.1.0",
+  "homepage": "http://github.com/ron-liu/validate-obj.js",
+  "keywords": [
+    "validator",
+    "validation",
+    "validate",
+    "form",
+    "object"
+  ],
+  "description": "simple way to validate object",
+  "bugs": {
+    "url": "http://github.com/ron-liu/validate-obj/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/ron-liu/validate-obj.js.git"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/_mocha --reporter spec"
+  },
+  "devDependencies": {
+    "mocha": "~1.17.1",
+    "istanbul": "~0.2.4",
+    "uglify-js": "~2.4.12",
+    "chai": "~1.8.1"
+  },
+  "engines": {
+    "node": ">= 0.8"
+  },
+  "author": "Ron Liu <ronliu2k@gmail.com>",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/chriso/validator.js/raw/master/LICENSE"
+    }
+  ]
 }
