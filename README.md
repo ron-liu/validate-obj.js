@@ -1,3 +1,4 @@
+![tests][travis]
 ## What is validate-obj? ##
 **validate-obj** is a javascript validation library, esp. for validate object.
 **validate-obj** both work for node.js server-side and front-end.
