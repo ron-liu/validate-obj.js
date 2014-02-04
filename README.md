@@ -14,7 +14,7 @@ var myUserForm = {
 	email: 'Jonh@emailDomain.com'
 };
 
-//Start validator
+//Start validating
 var errs = [],
 if (!validator.isEmail(myUserForm.email)) {
 	errs.push('email is invalid');
@@ -28,20 +28,21 @@ if (!validator.isIn(myUserForm.gender, ['male', 'female']) {
 	errs.push('gender is invalid');
 }
 
-//...
+//Not finished yet, still lots of stuff need to do
 ```
-**Are you tired of the above? How about we just simply do the following?**
 
- ```javascript
- var v = require('validate-obj');
- var errs = v.validateObj(myUserForm, {
-    name: [v.required, v.isString],
-    createdOn: [v.isDate],
-    age: [v.isNumber],
-    gender: [v.enums(['male', 'female'])],
-    email: [v.isEmail]
- });
- ```
+**Are you tired of the above? How about we just simply do the following?**
+```javascript
+var v = require('validate-obj');
+var errs = v.validateObj(myUserForm, {
+   name: [v.required, v.isString],
+   createdOn: [v.isDate],
+   age: [v.isNumber],
+   gender: [v.enums(['male', 'female'])],
+   email: [v.isEmail]
+});
+```
+It is beautiful, isn't it? and even we save this validation sytax object and reuse it in other cases.
 
 ## How to install? ##
  **For node.js**
