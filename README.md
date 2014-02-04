@@ -32,7 +32,7 @@ if (!validator.isIn(myUserForm.gender, ['male', 'female']) {
 
 //...
 ```
-**Are you tired of the above? How about we just simply do the following? **
+**Are you tired of the above? How about we just simply do the following?**
 
  ```javascript
  var v = require('validate-obj');
@@ -46,7 +46,7 @@ if (!validator.isIn(myUserForm.gender, ['male', 'female']) {
  ```
 
  How to install?
- ===========
+ ============
  **For node.js**
  ```bash
  npm install validate-obj
@@ -58,7 +58,7 @@ if (!validator.isIn(myUserForm.gender, ['male', 'female']) {
  ```
 
  Progress?
- ===========
+============
  Currently, it just support simple object and only has limited validators. My future plan is as below:
  * Support more validators;
  * Support extend custom validators;
