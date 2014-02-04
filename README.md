@@ -2,7 +2,7 @@
 **validate-obj** is a javascript validation library, esp. for validate object.
 **validate-obj** both work for node.js server-side and front-end.
 
-![tests][travis]
+[![Build Status](https://travis-ci.org/ron-liu/validate-obj.js.png?branch=master)](https://travis-ci.org/ron-liu/validate-obj.js)
 
 ## Why I create validate-obj? ##
 I started this project just because I want to use validation in my own project and I cannot find one suit my needs. I saw lots of javascript validation libraries, but actually there are validators. They are very easy to end up code like the following:
