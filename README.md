@@ -1,10 +1,10 @@
-## What is validate-obj? ##
+## What is validate-obj?
 **validate-obj** is a javascript validation library, esp. for validate object.
 **validate-obj** both work for node.js server-side and front-end.
 
 [![Build Status](https://travis-ci.org/ron-liu/validate-obj.js.png?branch=master)](https://travis-ci.org/ron-liu/validate-obj.js)
 
-## Why I create validate-obj? ##
+## Why I create validate-obj?
 I started this project just because I want to use validation in my own project and I cannot find one suit my needs. I saw lots of javascript validation libraries, but actually there are validators. They are very easy to end up code like the following:
 ```javascript
 var validator = require('validator');
@@ -46,7 +46,7 @@ var errs = v.validateObj(myUserForm, {
 ```
 It is beautiful, isn't it? and even we save this validation sytax object and reuse it in other cases.
 
-## How to install? ##
+## How to install?
  **For node.js**
  ```bash
  npm install validate-obj
@@ -57,7 +57,7 @@ It is beautiful, isn't it? and even we save this validation sytax object and reu
  bower install validate-obj
  ```
 
-## Progress? ##
+## Progress?
  Currently, it just support simple object and only has limited validators. My future plan is as below:
  * Support more validators;
  * Support extend custom validators;
