@@ -48,7 +48,15 @@ describe('simpleObj:', function() {
 	});
 
 	it('isIn with non-existed prop', function() {
-		expect(v.validateObj({}, {a:[v.isIn]})).to.equal(null);
+		expect(v.validateObj({}, {a:[v.isIn(['red','blue'])]})).to.equal(null);
+	});
+
+	it('isIn with existed not contained prop', function() {
+		expect(v.validateObj({a: 'yellow'}, {a: [v.isIn(['red', 'blue'])]})).to.include('a must be one of (red, blue)');
+	});
+
+	it('isIn with existed contained prop', function() {
+		expect(v.validateObj({a:'red'}, {a: [v.isIn(['red', 'blue'])]})).to.equal(null);
 	})
 
 });

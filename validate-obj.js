@@ -56,6 +56,21 @@
 		}
 	}
 
+	function _contains(array, k) {
+		for(var item in array) {
+			if (k === array[item]) return true;
+		}
+		return false;
+	}
+
+	function _reduce (array, fn) {
+		var ret = array[0];
+		for (var i = 1; i < array.length; i ++)	{
+			ret = fn(ret, array[1]);
+		}
+		return ret;
+	}
+
 	function _some(a) {
 		if (!_isArray(a)) return false;
 		return a.length > 0;
@@ -121,13 +136,17 @@
 		},
 
 		isIn: function (opts) {
-			return _getValidateFunc(
-				function (prop) {return _.contains(opts, prop);},
-				function (name) {
-					return _sprintf('%s must be one of (%s)', name,
-						_.reduce(opts, function(whole, opt) {return _sprintf('%s, %s', whole, opt);}));
-				}
-			);
+			return function(value, name) {
+				return _getValidateFunc(
+					function (prop) {
+						return _contains(opts, prop);
+					},
+					function (name) {
+						return _sprintf('%s must be one of (%s)', name,
+							_reduce(opts, function(whole, opt) {return _sprintf('%s, %s', whole, opt);}));
+					}
+				)(value,name);
+			}
 		},
 
 		minLength: function (min) {
