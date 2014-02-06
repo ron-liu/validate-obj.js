@@ -120,7 +120,7 @@
 			return _getValidateFunc(_isNumber, function(name) {return _sprintf('%s is not number', name);})(value, name);
 		},
 
-		enums: function (opts) {
+		isIn: function (opts) {
 			return _getValidateFunc(
 				function (prop) {return _.contains(opts, prop);},
 				function (name) {

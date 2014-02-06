@@ -47,4 +47,8 @@ describe('simpleObj:', function() {
 		expect(v.validateObj({a: 1}, {a:[v.isNumber]})).to.equal(null);
 	});
 
+	it('isIn with non-existed prop', function() {
+		expect(v.validateObj({}, {a:[v.isIn]})).to.equal(null);
+	})
+
 });
