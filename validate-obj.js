@@ -16,8 +16,8 @@
 		var errs = [];
 
 		namespace = namespace || '';
-
 		_each(options, function (validators, propName) {
+
 			var fullName = namespace + propName;
 
 			if (_isObject(options[propName]) && !_isArray(options[propName])) {
@@ -35,6 +35,7 @@
 			viaValidators(validators, obj[propName]);
 
 			function viaValidators(validators, propValue) {
+				if (!_isArray(validators)) validators = [validators];
 				_each(validators, function (validate) {
 					if (typeof propValue === 'undefined' &&  validate.name !== 'required' ) return;
 					var err = validate(propValue, fullName, obj);
