@@ -12,22 +12,109 @@
 	}
 })('validate-obj', function (validator) {
 
+	// small set of underscore
+	var u = {
+		isObject : function(o) {
+			return typeof o === "object";
+		},
+
+		each: function(obj, fn) {
+			for(var name in obj) {
+				fn(obj[name], name);
+			}
+		},
+
+		contains: function(array, k) {
+			for(var item in array) {
+				if (k === array[item]) return true;
+			}
+			return false;
+		},
+
+		reduce: function(array, fn) {
+			var ret = array[0];
+			for (var i = 1; i < array.length; i ++)	{
+				ret = fn(ret, array[1]);
+			}
+			return ret;
+		},
+
+		some: function(a) {
+			if (!u.isArray(a)) return false;
+			return a.length > 0;
+		},
+
+		isArray: function(a) {
+			return Object.prototype.toString.call(a) === "[object Array]";
+		},
+
+		isDate: function(d) {
+			return Object.prototype.toString.call(d) === "[object Date]";
+		},
+
+		isString: function(s) {
+			return typeof s === 'string';
+		},
+
+		isNumber: function(s) {
+			return typeof s === 'number';
+		},
+
+		isFunction: function(f) {
+			return typeof f === 'function';
+		},
+
+		every: function(list, fn) {
+			for(var item in list) {
+				if (!fn(list[item])) return false;
+			}
+			return true;
+		},
+		has: function(obj, propName) {
+			return obj.hasOwnProperty(propName);
+		}
+	};
+
+	// internal functions
+	var internal = {
+		getValidateFunc: function (validate, errString) {
+			return function(value, name) {
+				if (!validate(value)) return errString(name);
+				return undefined;
+			};
+		},
+		sprintf: function(str)
+		{
+			if (typeof str !== 'string') throw 'the 1st argument should be string';
+			var parts = str.split('%s');
+			if (parts.length != arguments.length) throw 'the number of %s in string is not equal to the number of variables';
+			var ret = parts[0];
+			for (var i = 1; i < arguments.length; i ++) {
+				ret += arguments[i] + parts[i];
+			}
+			return ret;
+		},
+		existy:function(obj, prop) {
+			return obj[prop] !== undefined;
+		}
+	};
+
 	function validateObject(obj, options, namespace) {
 		var errs = [];
 
 		namespace = namespace || '';
-		_each(options, function (validators, propName) {
+		u.each(options, function (validators, propName) {
 
 			var fullName = namespace + propName;
 
-			if (_isObject(obj[propName]) && !_isArray(options[propName])) {
-				if (!_isObject(obj[propName])) throw _sprintf('%s in validator is an object, while %s in object is not', propName, propName);
+			if (u.isObject(obj[propName]) && !u.isArray(options[propName])) {
+				if (!u.isObject(obj[propName])) throw internal.sprintf('%s in validator is an object, while %s in object is not', propName, propName);
 				validateObject(obj[propName], options[propName], fullName + '.');
 				return;
 			}
 
-			if (_isArray(obj[propName])) {
-				_each(obj[propName], function(member){
+			if (u.isArray(obj[propName])) {
+				u.each(obj[propName], function(member){
 					viaValidators(validators, member);
 				});
 				return;
@@ -35,8 +122,8 @@
 			viaValidators(validators, obj[propName]);
 
 			function viaValidators(validators, propValue) {
-				if (!_isArray(validators)) validators = [validators];
-				_each(validators, function (validate) {
+				if (!u.isArray(validators)) validators = [validators];
+				u.each(validators, function (validate) {
 					if (typeof propValue === 'undefined' &&  validate.name !== 'required' ) return;
 					var err = validate(propValue, fullName, obj);
 					if (err) errs.push(err);
@@ -44,117 +131,70 @@
 			}
 		});
 
-		return _some(errs) ? errs : null;
+		return u.some(errs) ? errs : null;
 	}
 
-	function _isObject (o) {
-		return typeof o === "object";
-	}
-
-	function _each(obj, fn) {
-		for(var name in obj) {
-			fn(obj[name], name);
-		}
-	}
-
-	function _contains(array, k) {
-		for(var item in array) {
-			if (k === array[item]) return true;
-		}
-		return false;
-	}
-
-	function _reduce (array, fn) {
-		var ret = array[0];
-		for (var i = 1; i < array.length; i ++)	{
-			ret = fn(ret, array[1]);
-		}
-		return ret;
-	}
-
-	function _some(a) {
-		if (!_isArray(a)) return false;
-		return a.length > 0;
-	}
-
-	function _isArray(a) {
-		return Object.prototype.toString.call(a) === "[object Array]";
-	}
-
-	function _isDate(d) {
-		return Object.prototype.toString.call(d) === "[object Date]";
-	}
-
-	function _isString(s) {
-		return typeof s === 'string';
-	}
-
-	function _isNumber(s) {
-		return typeof s === 'number';
-	}
-
-	function _getValidateFunc(validate, errString) {
-		return function(value, name) {
-			if (!validate(value)) return errString(name);
-			return undefined;
-		};
-	}
-
-	function _sprintf(str)
-	{
-		if (typeof str !== 'string') throw 'the 1st argument should be string';
-		var parts = str.split('%s');
-		if (parts.length != arguments.length) throw 'the number of %s in string is not equal to the number of variables';
-		var ret = parts[0];
-		for (var i = 1; i < arguments.length; i ++) {
-			ret += arguments[i] + parts[i];
-		}
-		return ret;
-	}
-
-	function _existy(obj, prop) {
-		return obj[prop] !== undefined;
-	}
 
 	return {
 		validateObj: validateObject,
 
 		required: function required(value, name, obj) {
-			if (!_existy(obj, name)) return name + ' is required';
+			if (!internal.existy(obj, name)) return name + ' is required';
 			return undefined;
 		},
 
 		isDate: function (value, name) {
-			return _getValidateFunc(_isDate, function(name) {return _sprintf('%s is not date', name);})(value, name);
+			return internal.getValidateFunc(u.isDate, function(name) {return internal.sprintf('%s is not date', name);})(value, name);
 		},
 
 		isString: function (value, name) {
-			return _getValidateFunc(_isString, function(name) {return _sprintf('%s is not string', name);})(value, name);
+			return internal.getValidateFunc(u.isString, function(name) {return internal.sprintf('%s is not string', name);})(value, name);
 		},
 
 		isNumber: function (value, name) {
-			return _getValidateFunc(_isNumber, function(name) {return _sprintf('%s is not number', name);})(value, name);
+			return internal.getValidateFunc(u.isNumber, function(name) {return internal.sprintf('%s is not number', name);})(value, name);
 		},
 
 		isIn: function (opts) {
 			return function(value, name) {
-				return _getValidateFunc(
+				return internal.getValidateFunc(
 					function (prop) {
-						return _contains(opts, prop);
+						return u.contains(opts, prop);
 					},
 					function (name) {
-						return _sprintf('%s must be one of (%s)', name,
-							_reduce(opts, function(whole, opt) {return _sprintf('%s, %s', whole, opt);}));
+						return internal.sprintf('%s must be one of (%s)', name,
+							u.reduce(opts, function(whole, opt) {return internal.sprintf('%s, %s', whole, opt);}));
 					}
 				)(value,name);
 			}
 		},
 
 		minLength: function (min) {
-			return _getValidateFunc(
-				function(prop) {return _.isString(prop) && prop.length >= min;},
-				function(name) {return _sprintf('%s must have at least %d characters', name, min); }
+			return internal.getValidateFunc(
+				function(prop) {return u.isString(prop) && prop.length >= min;},
+				function(name) {return internal.sprintf('%s must have at least %d characters', name, min); }
 			);
+		},
+
+		isValidator: {
+			validator: function(v) {
+				if (u.isFunction(v)) return true;
+				if (u.isArray(v) && u.every(v, u.isFunction)) return true;
+				if (_isvalidatorObj(v)) return true;
+				if (u.isArray(v) && u.every(v, _isvalidatorObj)) return true;
+				return false;
+
+				function _isvalidatorObj(v) {
+					if (!u.isObject(v)) return false;
+					return u.has(v, 'validator') && u.isFunction(v['validator']) &&
+						u.has(v, 'err') && (u.isFunction(v['err']) || u.isString(v['err']));
+				}
+			},
+			err: function(propName) {
+				return internal.sprintf('%s is not a validator, validator should be a {validatorFunc, err}, validatorFunc, [validatorFunc], or [{validatorFunc, err}]');
+			}
 		}
 	}
+
+
 });
