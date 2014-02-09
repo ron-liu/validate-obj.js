@@ -20,7 +20,7 @@
 
 			var fullName = namespace + propName;
 
-			if (_isObject(options[propName]) && !_isArray(options[propName])) {
+			if (_isObject(obj[propName]) && !_isArray(options[propName])) {
 				if (!_isObject(obj[propName])) throw _sprintf('%s in validator is an object, while %s in object is not', propName, propName);
 				validateObject(obj[propName], options[propName], fullName + '.');
 				return;
