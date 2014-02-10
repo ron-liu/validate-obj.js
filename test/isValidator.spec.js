@@ -37,5 +37,12 @@ describe.only('isValidator', function() {
 			validator: 'string',
 			err: 'invalid prop'
 		})).to.equal(false);
-	})
+	});
+
+	it('{validator, params} should ok', function() {
+		expect(v.isValidator.validator({
+			validator: function() {},
+			params: {}
+		})).to.equal(true);
+	});
 });

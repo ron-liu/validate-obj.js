@@ -1,5 +1,5 @@
 //     validate-obj.js 1.5.2
-//     (c) 2009-2014 Ron Liu
+//     (c) 2014 Ron Liu
 //     validate-obj may be freely distributed under the MIT license.
 
 (function (name, definition) {
@@ -11,8 +11,6 @@
 		this[name] = definition();
 	}
 })('validate-obj', function (validator) {
-
-	// small set of underscore
 	var u = {
 		isObject : function(o) {
 			return typeof o === "object";
@@ -72,10 +70,18 @@
 		},
 		has: function(obj, propName) {
 			return obj.hasOwnProperty(propName);
+		},
+		union: function() {
+			var ret = [];
+			u.each(arguments, function(argument, name) {
+				u.each(argument, function(item, itemName) {
+					if (u.contains(ret, item)) return;
+					ret.push(item);
+				});
+			});
+			return ret;
 		}
-	};
-
-	// internal functions
+	}; // small set of underscore
 	var internal = {
 		getValidateFunc: function (validate, errString) {
 			return function(value, name) {
@@ -96,47 +102,60 @@
 		},
 		existy:function(obj, prop) {
 			return obj[prop] !== undefined;
+		},
+		isValidator: function(v) {
+			if (_isValidator(v)) return true;
+			if (u.isArray(v) && u.every(v, _isValidator)) return true;
+			return false;
+
+			function _isValidator(v) {
+				if(u.isFunction(v)) return true;
+				if (!u.isObject(v)) return false;
+				return u.has(v, 'validator') && u.isFunction(v['validator']) && (
+					(u.has(v, 'err') && (u.isFunction(v['err']) || u.isString(v['err']))) ||
+						(u.has(v, 'params') && (u.isObject(v['params']))))
+					;
+			}
 		}
-	};
+	}; // internal functions
 
-	function validateObject(obj, options, namespace) {
-		var errs = [];
+	return {
+		validateObj: function (obj, validatorObj, namespace, errs) {
+			var errs = errs || [];
+			namespace = namespace || '';
 
-		namespace = namespace || '';
-		u.each(options, function (validators, propName) {
-
-			var fullName = namespace + propName;
-
-			if (u.isObject(obj[propName]) && !u.isArray(options[propName])) {
-				if (!u.isObject(obj[propName])) throw internal.sprintf('%s in validator is an object, while %s in object is not', propName, propName);
-				validateObject(obj[propName], options[propName], fullName + '.');
-				return;
-			}
-
-			if (u.isArray(obj[propName])) {
-				u.each(obj[propName], function(member){
-					viaValidators(validators, member);
-				});
-				return;
-			}
-			viaValidators(validators, obj[propName]);
-
-			function viaValidators(validators, propValue) {
+			function _validate(validators, propValue) {
 				if (!u.isArray(validators)) validators = [validators];
-				u.each(validators, function (validate) {
-					if (typeof propValue === 'undefined' &&  validate.name !== 'required' ) return;
-					var err = validate(propValue, fullName, obj);
+				u.each(validators, function (validator) {
+					if (typeof propValue === 'undefined' &&  validator.name !== 'required' ) return;
+					var err = validator(propValue, fullName, obj);
 					if (err) errs.push(err);
 				});
 			}
-		});
 
-		return u.some(errs) ? errs : null;
-	}
+			if (internal.isValidator(validatorObj)) return u.union(errs, _validate(validatorObj, obj));
 
+			u.each(validatorObj, function (validators, propName) {
 
-	return {
-		validateObj: validateObject,
+				var fullName = namespace + propName;
+
+				if (u.isObject(obj[propName]) && !u.isArray(validatorObj[propName])) {
+					if (!u.isObject(obj[propName])) throw internal.sprintf('%s in validator is an object, while %s in object is not', propName, propName);
+					validateObject(obj[propName], validatorObj[propName], fullName + '.');
+					return;
+				}
+
+				if (u.isArray(obj[propName])) {
+					u.each(obj[propName], function(member){
+						_validate(validators, member);
+					});
+					return;
+				}
+				_validate(validators, obj[propName]);
+			});
+
+			return u.some(errs) ? errs : null;
+		},
 
 		required: function required(value, name, obj) {
 			if (!internal.existy(obj, name)) return name + ' is required';
@@ -176,25 +195,17 @@
 			);
 		},
 
+		// validator could have the following format:
+		// v.func;
+		// {validator: v.func, err: 'this is wrong'};
+		// {validator: v.func, err: function(propName) {...}}
+		// {validator: v.func, {...}
+		// and array of the above
 		isValidator: {
-			validator: function(v) {
-				if (u.isFunction(v)) return true;
-				if (u.isArray(v) && u.every(v, u.isFunction)) return true;
-				if (_isvalidatorObj(v)) return true;
-				if (u.isArray(v) && u.every(v, _isvalidatorObj)) return true;
-				return false;
-
-				function _isvalidatorObj(v) {
-					if (!u.isObject(v)) return false;
-					return u.has(v, 'validator') && u.isFunction(v['validator']) &&
-						u.has(v, 'err') && (u.isFunction(v['err']) || u.isString(v['err']));
-				}
-			},
+			validator: internal.isValidator,
 			err: function(propName) {
-				return internal.sprintf('%s is not a validator, validator should be a {validatorFunc, err}, validatorFunc, [validatorFunc], or [{validatorFunc, err}]');
+				return internal.sprintf('%s is not a validator, validator should be a {validatorFunc, err/params}, validatorFunc, [validatorFunc], or [{validatorFunc, err/params}]');
 			}
 		}
 	}
-
-
 });
