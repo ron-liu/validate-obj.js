@@ -29,10 +29,12 @@
 			return false;
 		},
 
-		reduce: function(array, fn) {
-			var ret = array[0];
-			for (var i = 1; i < array.length; i ++)	{
-				ret = fn(ret, array[1]);
+		reduce: function(array, fn, memo) {
+			var ret = memo || array[0],
+				hasMemo = !!memo;
+
+			for (var i = hasMemo ? 0 : 1; i < array.length; i ++)	{
+				ret = fn(ret, array[i]);
 			}
 			return ret;
 		},
@@ -80,8 +82,15 @@
 				});
 			});
 			return ret;
+		},
+		range: function(n) {
+			var ret = [];
+			for(var i = 0; i < n; i ++) ret.push(i);
+			return ret;
 		}
 	}; // small set of underscore
+	var funcAttrName = '__validator-obj__';
+
 	var internal = {
 		getValidateFunc: function (validate, errString) {
 			return function(value, name) {
@@ -100,44 +109,47 @@
 			}
 			return ret;
 		},
-		existy:function(obj, prop) {
-			return obj[prop] !== undefined;
+		existy:function(value) {
+			return value !== undefined && value !== null;
 		},
-		isValidator: function(v) {
-			if (_isValidator(v)) return true;
-			if (u.isArray(v) && u.every(v, _isValidator)) return true;
-			return false;
+
+		isValidationExpression: function(v) {
+			var validators = u.isArray(v) ? v : [v];
+			return u.every(validators, _isValidator);
 
 			function _isValidator(v) {
-				if(u.isFunction(v)) return true;
-				if (!u.isObject(v)) return false;
-				return u.has(v, 'validator') && u.isFunction(v['validator']) && (
-					(u.has(v, 'err') && (u.isFunction(v['err']) || u.isString(v['err']))) ||
-						(u.has(v, 'params') && (u.isObject(v['params']))))
-					;
+				if(!u.isFunction(v)) return false;
+				if (!u.has(v, funcAttrName)) return false;
+				var attr = v[funcAttrName];
+				return (attr.type === 'concrete' ||
+					(attr.type === 'highOrder' && !attr.needParams));
 			}
 		}
 	}; // internal functions
 
-	return {
-		validateObj: function (obj, validatorObj, namespace, errs) {
+	var ret = {
+		validateObj: function (obj, validatorObj, name, errs) {
 			var errs = errs || [];
-			namespace = namespace || '';
+			name = name || '';
 
-			function _validate(validators, propValue) {
+			function _validate(validators, value, name) {
+				var ret = [];
 				if (!u.isArray(validators)) validators = [validators];
-				u.each(validators, function (validator) {
-					if (typeof propValue === 'undefined' &&  validator.name !== 'required' ) return;
-					var err = validator(propValue, fullName, obj);
-					if (err) errs.push(err);
+				u.map(validators, function(validator) {
+					return validator(value, name);
 				});
+				u.each(validators, function (validator) {
+					var err = validator(value, name);
+					if (err) ret.push(err);
+				});
+				return ret;
 			}
 
-			if (internal.isValidator(validatorObj)) return u.union(errs, _validate(validatorObj, obj));
+			if (internal.isValidationExpression(validatorObj)) return u.union(errs, _validate(validatorObj, obj, name));
 
 			u.each(validatorObj, function (validators, propName) {
 
-				var fullName = namespace + propName;
+				var fullName = name + propName;
 
 				if (u.isObject(obj[propName]) && !u.isArray(validatorObj[propName])) {
 					if (!u.isObject(obj[propName])) throw internal.sprintf('%s in validator is an object, while %s in object is not', propName, propName);
@@ -157,9 +169,13 @@
 			return u.some(errs) ? errs : null;
 		},
 
-		required: function required(value, name, obj) {
-			if (!internal.existy(obj, name)) return name + ' is required';
-			return undefined;
+		required: {
+			validator: function required(value) {
+				return internal.existy(value) ;
+			},
+			err: function(name) {
+				return name + ' is required';
+			}
 		},
 
 		isDate: function (value, name) {
@@ -201,11 +217,28 @@
 		// {validator: v.func, err: function(propName) {...}}
 		// {validator: v.func, {...}
 		// and array of the above
-		isValidator: {
-			validator: internal.isValidator,
-			err: function(propName) {
-				return internal.sprintf('%s is not a validator, validator should be a {validatorFunc, err/params}, validatorFunc, [validatorFunc], or [{validatorFunc, err/params}]');
+		isValidationExpression: internal.isValidationExpression,
+
+		register : function(name, func, needParams) {
+			if (!u.contains([2,3], arguments.length)) throw 'only suppoert 2 or 3 parameters';
+			if (arguments.length == 2) {
+				func = arguments[0];
+				needParams = arguments[1];
 			}
+			if (!u.isFunction(func)) throw 'the passing argument is not a function';
+			name = name || func.name;
+			if (!name) throw  'the passing argument has no name';
+			var highOrderFunc = function(err, params) {
+				var ret = function(value, name) {
+					return func(value, name, err, params);
+				};
+				ret[funcAttrName] = {type:'concrete', needParams: needParams};
+				return ret;
+			};
+			highOrderFunc[funcAttrName] = {type:'highOrder', needParams: needParams};
+			ret[name] = highOrderFunc;
 		}
-	}
+	};
+
+	return ret;
 });
