@@ -30,5 +30,27 @@ describe.only('register:', function() {
 
 		var g = v.testRequired(function(name){ return name +' is fucked';});
 		expect(g(undefined, 'age')).to.equal('age is fucked');
-	})
+	});
+
+	it('2 parameters with func name should also work', function() {
+		v.register(function testRequired(v, name, err) {
+			if (v == undefined) {
+				return typeof err === 'string' ? err : err(name);
+			}
+			return true;
+		}, false);
+
+		expect(v.testRequired['__validator-obj__'].type).to.equal('highOrder');
+		expect(v.testRequired['__validator-obj__'].needParams).to.equal(false);
+	});
+
+	it('2 parameters without func name should also work', function(done) {
+		try {
+			v.register(function (v, name, err) {return true;}, false);
+		}
+		catch (e) {
+			done();
+		}
+
+	});
 });

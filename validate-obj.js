@@ -219,11 +219,17 @@
 		// and array of the above
 		isValidationExpression: internal.isValidationExpression,
 
-		register : function(name, func, needParams) {
+		register : function() /* name, func, needParams or func, needParams */ {
+			var name, func, needParams;
 			if (!u.contains([2,3], arguments.length)) throw 'only suppoert 2 or 3 parameters';
-			if (arguments.length == 2) {
+			if (arguments.length === 2) {
 				func = arguments[0];
 				needParams = arguments[1];
+			}
+			if (arguments.length === 3) {
+				name = arguments[0];
+				func = arguments[1];
+				needParams = arguments[2];
 			}
 			if (!u.isFunction(func)) throw 'the passing argument is not a function';
 			name = name || func.name;
@@ -239,6 +245,8 @@
 			ret[name] = highOrderFunc;
 		}
 	};
+
+
 
 	return ret;
 });
