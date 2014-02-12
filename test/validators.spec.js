@@ -4,67 +4,79 @@ var expect = require('chai').expect;
 describe('built-in validators:', function() {
 	describe ('required:', function() {
 		it('existed prop', function() {
-			expect(v.validateObj({a:1}, {a:[v.required]})).to.equal(null);
+			expect(v.hasErrors(1, v.required)).to.equal(null);
 		});
 		it('non-existed prop', function () {
-			expect(v.validateObj({}, {a:[v.required]})).to.include('a is required');
+			expect(v.hasErrors(null, v.required)).to.include('it is required');
 		});
 		it ('existed prop', function() {
-			expect(v.validateObj({a: 1}, {a: [v.required]})).to.equal(null);
+			expect(v.hasErrors(undefined, v.required)).to.include('it is required');
 		})
 	});
 
 	describe('isDate:', function() {
-		it('isDate with non-existed prop', function() {
-			expect(v.validateObj({}, {a:[v.isDate]})).to.equal(null);
+		it('undefined should pass', function() {
+			expect(v.hasErrors(undefined, v.isDate)).to.equal(null);
 		});
 
-		it('isDate with existed non-Date', function() {
-			expect(v.validateObj({a:1}, {a:[v.isDate]})).to.include('a is not date');
+		it('int should not pass', function() {
+			expect(v.hasErrors(1, v.isDate)).to.include('it is not date');
 		});
 
-		it('existed Date', function() {
-			expect(v.validateObj({a: new Date()}, {a:[v.isDate]})).to.equal(null);
+		it('date should pass', function() {
+			expect(v.hasErrors(new Date(), v.isDate)).to.equal(null);
 		});
 	});
 
 	describe('isString:', function() {
-		it('non-existed prop', function() {
-			expect(v.validateObj({}, {a:[v.isString]})).to.equal(null);
+		it('undefined should pass', function() {
+			expect(v.hasErrors(undefined, v.isString)).to.equal(null);
 		});
-		it('existed non-string prop', function() {
-			expect(v.validateObj({a: 1}, {a:[v.isString]})).to.include('a is not string');
+		it('int should not pass', function() {
+			expect(v.hasErrors(1, v.isString)).to.include('it is not string');
 		});
 
-		it('existed string prop', function() {
-			expect(v.validateObj({a: 'abc'}, {a:[v.isString]})).to.equal(null);
+		it('string should pass', function() {
+			expect(v.hasErrors('abc', v.isString)).to.equal(null);
 		});
 	});
 
 	describe('isNumber:', function() {
-		it('non-existed prop', function() {
-			expect(v.validateObj({}, {a:[v.isNumber]})).to.equal(null);
+		it('undefined should pass', function() {
+			expect(v.hasErrors(undefined, v.isNumber)).to.equal(null);
 		});
-		it('existed non-number prop', function() {
-			expect(v.validateObj({a: 'fdas'}, {a:[v.isNumber]})).to.include('a is not number');
+		it('string should not pass', function() {
+			expect(v.hasErrors('fdas', v.isNumber)).to.include('it is not number');
 		});
 
-		it('existed number prop', function() {
-			expect(v.validateObj({a: 1}, {a:[v.isNumber]})).to.equal(null);
+		it('number should pass', function() {
+			expect(v.hasErrors(1, v.isNumber)).to.equal(null);
 		});
 	});
 
 	describe('isIn:', function() {
-		it('non-existed prop', function() {
-			expect(v.validateObj({}, {a:[v.isIn(['red','blue'])]})).to.equal(null);
+		it('undefined should pass', function() {
+			expect(v.hasErrors(undefined, v.isIn(null, {options: ['red','blue']}))).to.equal(null);
 		});
 
-		it('existed not contained prop', function() {
-			expect(v.validateObj({a: 'yellow'}, {a: [v.isIn(['red', 'blue'])]})).to.include('a must be one of (red, blue)');
+		it('not contained should not pass', function() {
+			expect(v.hasErrors('yellow', v.isIn(null, {options: ['red', 'blue']}))).to.include('it must be one of (red, blue)');
 		});
 
-		it('existed contained prop', function() {
-			expect(v.validateObj({a:'red'}, {a: [v.isIn(['red', 'blue'])]})).to.equal(null);
+		it('contained should pass', function() {
+			expect(v.hasErrors('red', v.isIn(null, {options: ['red', 'blue']}))).to.equal(null);
 		})
 	});
+
+	describe('minLength', function() {
+		it('int should not pass', function() {
+			expect(v.hasErrors(1, v.minLength(null, {min: 3}))).to.include('it must be a string and have at least 3 characters');
+		});
+		it('3 length should pass', function() {
+			expect(v.hasErrors('abc', v.minLength(null, {min: 3}))).to.equal(null);
+		})
+		it('2 length should not pass', function() {
+			expect(v.hasErrors('ab', v.minLength(null, {min: 3}))).to.include('it must be a string and have at least 3 characters');
+		});
+	})
 });
