@@ -17,6 +17,13 @@
 			return typeof o === "object";
 		},
 		each: function(obj, fn) {
+			if (u.isArray(obj)) {
+				for(var i = 0; i < obj.length; i ++) {
+					fn(obj[i], i);
+				}
+				return;
+			}
+
 			for(var name in obj) {
 				fn(obj[name], name);
 			}
@@ -149,7 +156,7 @@
 	var ret = {
 		hasErrors: function (obj, validatorObj, name, errs) {
 			var errs = errs || [];
-			name = name || '';
+			name = name || 'it';
 
 			function _validate(validators, value, name) {
 				if (!u.isArray(validators)) validators = [validators];
@@ -165,33 +172,28 @@
 				if (u.isArray(obj))
 				{
 					return m.emptyToNull(u.union(errs, u.reduce(u.map(obj, function(item, i){
-						return _validate(validatorObj, item, m.sprintf('%s[%s]', name || 'it', i));
+						return _validate(validatorObj, item, m.sprintf('%s[%s]', name, i));
 					}), function(a,b){return u.union(a, b)})));
 				}
 
 				return m.emptyToNull(u.union(errs, _validate(validatorObj, obj, name)));
 			}
 
-			u.each(validatorObj, function (validators, propName) {
+			if (!u.isObject(validatorObj) || u.isArray(validatorObj)) throw m.sprintf("invalid validation expression: %s", name);
 
-				var fullName = name + propName;
-
-				if (u.isObject(obj[propName]) && !u.isArray(validatorObj[propName])) {
-					if (!u.isObject(obj[propName])) throw i.sprintf('%s in validator is an object, while %s in object is not', propName, propName);
-					validateObject(obj[propName], validatorObj[propName], fullName + '.');
-					return;
-				}
-
-				if (u.isArray(obj[propName])) {
-					u.each(obj[propName], function(member){
-						_validate(validators, member);
+			if (u.isArray(obj)) {
+				u.each(obj, function(o, no) {
+					u.each(validatorObj, function (validators, propName) {
+						errs = u.union(errs, ret.hasErrors((obj[no] || {})[propName], validators, m.sprintf('%s[%s].%s', name, no, propName)))
 					});
-					return;
-				}
-				_validate(validators, obj[propName]);
+				})
+				return m.emptyToNull(errs);
+			}
+			u.each(validatorObj, function (validators, propName) {
+				errs = u.union(errs, ret.hasErrors((obj || {})[propName], validators, name + '.' + propName))
 			});
 
-			return u.some(errs) ? errs : null;
+			return m.emptyToNull(errs);
 		},
 
 		// validator could have the following format:
@@ -222,7 +224,7 @@
 			if (!u.isFunction(validateFn) || !u.isFunction(errFn)) throw 'validateFn and errFn are required';
 			return function(value, name, err, params) {
 				err = err || errFn;
-				return validateFn(value, params) ? null : (u.isString(err) ? err : err(name || 'it', params));
+				return validateFn(value, params) ? null : (u.isString(err) ? err : err(name, params));
 			};
 		}
 	};
