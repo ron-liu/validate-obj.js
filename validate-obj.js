@@ -67,7 +67,7 @@
 		union: function() {
 			var ret = [];
 			u.each(arguments, function(argument, name) {
-				if (!i.existy(argument)) return;
+				if (!m.existy(argument)) return;
 				u.each(argument, function(item, itemName) {
 					if (u.contains(ret, item)) return;
 					ret.push(item);
@@ -82,8 +82,16 @@
 		},
 		map: function(list, fn) {
 			var ret = [];
+
+			if (u.isArray(list)) {
+				for (var i = 0; i < list.length; i ++) {
+					ret.push(fn(list[i], i));
+				}
+				return ret;
+			}
+
 			for (var item in list) {
-				ret.push(fn(list[item]));
+				ret.push(fn(list[item], item));
 			}
 			return ret;
 		},
@@ -96,9 +104,10 @@
 		},
 		identity: function(i) {return i;}
 	}; // small set of underscore
-	var i = {
+	var m = {
 		emptyToNull: function(list) {
-			return u.some(list) ? list : null;
+			var ret = u.filter(list, u.identity);
+			return u.some(ret) ? ret : null;
 		},
 		sprintf: function(str)
 		{
@@ -132,7 +141,7 @@
 
 			function _isValidator(v) {
 				if(!u.isFunction(v)) return false;
-				return (i.isConcrete(v) || (i.isHighOrder(v) && !i.needParams(v)));
+				return (m.isConcrete(v) || (m.isHighOrder(v) && !m.needParams(v)));
 			}
 		}
 	}; // internal functions
@@ -146,14 +155,21 @@
 				if (!u.isArray(validators)) validators = [validators];
 				return u.filter(
 					u.map(validators, function (validator) {
-						if (i.isHighOrder(validator)) validator = validator();
-						if (!i.existy(value) && i.funcName(validator) !== 'required') return null;
+						if (m.isHighOrder(validator)) validator = validator();
+						if (!m.existy(value) && m.funcName(validator) !== 'required') return null;
 						return validator(value, name);
 					}), u.identity);
 			}
 
-			if (i.isValidationExpression(validatorObj))	{
-				return i.emptyToNull(u.union(errs, _validate(validatorObj, obj, name)));
+			if (m.isValidationExpression(validatorObj))	{
+				if (u.isArray(obj))
+				{
+					return m.emptyToNull(u.union(errs, u.reduce(u.map(obj, function(item, i){
+						return _validate(validatorObj, item, m.sprintf('%s[%s]', name || 'it', i));
+					}), function(a,b){return u.union(a, b)})));
+				}
+
+				return m.emptyToNull(u.union(errs, _validate(validatorObj, obj, name)));
 			}
 
 			u.each(validatorObj, function (validators, propName) {
@@ -184,7 +200,7 @@
 		// {validator: v.func, err: function(propName) {...}}
 		// {validator: v.func, {...}
 		// and array of the above
-		isValidationExpression: i.isValidationExpression,
+		isValidationExpression: m.isValidationExpression,
 
 		register : function(name, func, needParams) {
 			if (!u.isFunction(func)) throw 'the passing argument is not a function';
@@ -212,31 +228,31 @@
 	};
 
 	ret.register('required', ret.build(
-		function(value) {return i.existy(value);},
+		function(value) {return m.existy(value);},
 		function(name) {return  name + ' is required';}
 	));
 	ret.register('isDate', ret.build(
 		u.isDate,
-		function(name) {return i.sprintf('%s is not date', name);}
+		function(name) {return m.sprintf('%s is not date', name);}
 	));
 	ret.register('isString', ret.build(
 		u.isString,
-		function(name) {return i.sprintf('%s is not string', name);}
+		function(name) {return m.sprintf('%s is not string', name);}
 	));
 	ret.register('isNumber', ret.build(
 		u.isNumber,
-		function(name) {return i.sprintf('%s is not number', name);}
+		function(name) {return m.sprintf('%s is not number', name);}
 	));
 	ret.register('isIn',ret.build(
 		function (value, params) { return u.contains(params.options, value); },
 		function (name, params) {
-			return i.sprintf('%s must be one of (%s)', name,
-				u.reduce(params.options, function(whole, opt) {return i.sprintf('%s, %s', whole, opt);}));
+			return m.sprintf('%s must be one of (%s)', name,
+				u.reduce(params.options, function(whole, opt) {return m.sprintf('%s, %s', whole, opt);}));
 		}
 	));
 	ret.register('minLength', ret.build(
 		function(value, params) {return u.isString(value) && value.length >= params.min;},
-		function(name, params) {return i.sprintf('%s must be a string and have at least %s characters', name, params.min); }
+		function(name, params) {return m.sprintf('%s must be a string and have at least %s characters', name, params.min); }
 	));
 
 	return ret;
