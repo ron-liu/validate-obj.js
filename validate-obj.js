@@ -169,29 +169,37 @@
 			}
 
 			if (m.isValidationExpression(validatorObj))	{
-				if (u.isArray(obj))
-				{
-					return m.emptyToNull(u.union(errs, u.reduce(u.map(obj, function(item, i){
-						return _validate(validatorObj, item, m.sprintf('%s[%s]', name, i));
-					}), function(a,b){return u.union(a, b)})));
-				}
-
 				return m.emptyToNull(u.union(errs, _validate(validatorObj, obj, name)));
 			}
 
-			if (!u.isObject(validatorObj) || u.isArray(validatorObj)) throw m.sprintf("invalid validation expression: %s", name);
-
-			if (u.isArray(obj)) {
-				u.each(obj, function(o, no) {
-					u.each(validatorObj, function (validators, propName) {
-						errs = u.union(errs, ret.hasErrors((obj[no] || {})[propName], validators, m.sprintf('%s[%s].%s', name, no, propName)))
-					});
-				})
-				return m.emptyToNull(errs);
+			if (u.isArray(validatorObj)) {
+				if (validatorObj.length !== 1) throw 'array validation expression must have one and only one validation expression, like [[v.required, v.isString]]';
+				if(!u.isArray(obj)) return [m.sprintf('%s is not array', name)];
+				if(!m.isValidationExpression(validatorObj[0])) {
+					u.each(obj, function(o, no) {
+						errs = u.union(errs, ret.hasErrors((m.existy(o) ? o : {}), validatorObj[0], m.sprintf('%s[%s]', name, no)));
+					})
+					return m.emptyToNull(errs);
+				}
+				return m.emptyToNull(u.union(errs, u.reduce(u.map(obj, function(item, i){
+					return _validate(validatorObj[0], item, m.sprintf('%s[%s]', name, i));
+				}), function(a,b){return u.union(a, b)})));
 			}
+
+
+			if (!u.isObject(validatorObj)) throw m.sprintf("invalid validation expression: %s", name);
 			u.each(validatorObj, function (validators, propName) {
-				errs = u.union(errs, ret.hasErrors((obj || {})[propName], validators, name + '.' + propName))
+				errs = u.union(errs, ret.hasErrors((m.existy(obj) ? obj : {})[propName], validators, name + '.' + propName))
 			});
+
+//			if (u.isArray(obj)) {
+//				u.each(obj, function(o, no) {
+//					u.each(validatorObj, function (validators, propName) {
+//						errs = u.union(errs, ret.hasErrors((obj[no] || {})[propName], validators, m.sprintf('%s[%s].%s', name, no, propName)))
+//					});
+//				})
+//				return m.emptyToNull(errs);
+//			}
 
 			return m.emptyToNull(errs);
 		},

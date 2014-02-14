@@ -1,19 +1,6 @@
 var v = require('../validate-obj');
 var expect = require('chai').expect;
 
-describe('simple array,', function() {
-	it('array of int should pass required', function() {
-		expect(v.hasErrors([1,2], v.required)).to.equal(null);
-	});
-
-	it('array of undefined should not pass', function() {
-		var ret = v.hasErrors([1, undefined, null], v.required);
-
-		expect(ret).to.include('it[1] is required');
-		expect(ret).to.include('it[2] is required');
-	});
-});
-
 describe('invalid validation expression', function() {
 	it('int is invalid validation expression', function(done) {
 		try{
@@ -90,39 +77,116 @@ describe('nested obj', function() {
 		});
 	});
 
-	describe('object in array', function() {
-		var validationExpression;
-
-		beforeEach(function() {
-			validationExpression = {
-				customerName: [v.isString, v.required],
-				items: {
-					no: v.isString,
-					sku: v.isNumber
-				}
-			}
+	describe('simple array', function() {
+		it('array expression with non array target should not ok', function() {
+			expect(v.hasErrors(1, [[v.isNumber]])).to.include('it is not array');
 		});
 
-		it('should be ok', function() {
-			var ret = v.hasErrors({
+		it('non array expression with array target should not ok', function() {
+			expect(v.hasErrors([1], v.isNumber)).to.include('it is not number');
+		});
+
+		it('array express with array target should be ok', function() {
+			expect(v.hasErrors([1], [[v.isNumber]])).to.equal(null);
+		});
+
+		it('array of int should pass required', function() {
+			expect(v.hasErrors([1,2], v.required)).to.equal(null);
+		});
+
+		it('array of undefined should not pass', function() {
+			var ret = v.hasErrors([1, undefined, null], [[v.required]]);
+
+			expect(ret).to.include('it[1] is required');
+			expect(ret).to.include('it[2] is required');
+		});
+	});
+
+	describe('object in array', function() {
+		it('array object validation express with non array target should not pass', function() {
+			var target = {
 				customerName: 'ron',
-				items: [{
+				items: {
 					no: '1',
 					sku: 123
+				}
+			};
+			var expression = {
+				customerName: v.isString,
+				items: [{
+					no: v.isString,
+					sku: v.isNumber
 				}]
-			}, validationExpression);
-			expect(ret).is.equal(null);
+			};
+			var ret = v.hasErrors(target, expression);
+			console.log(ret);
+			expect(ret).is.include('it.items is not array');
 		});
 
-		it('should not ok', function() {
-			var ret = v.hasErrors({
+		it('array object validation express with array target, but invalid data should not pass', function() {
+			var target = {
 				customerName: 'ron',
 				items: [{
 					no: '1',
 					sku: 'abc'
 				}]
-			}, validationExpression);
+			};
+			var expression = {
+				customerName: v.isString,
+				items: [{
+					no: v.isString,
+					sku: v.isNumber
+				}]
+			};
+			var ret = v.hasErrors(target, expression);
+			console.log(ret);
+			expect(ret.length).to.equal(1);
 			expect(ret).is.include('it.items[0].sku is not number');
+		});
+
+		it('array object validation express with array target, but invalid data should not pass', function() {
+			var target = {
+				customerName: 'ron',
+				items: [{
+					no: new Date(),
+					sku: 234
+				}, {
+					no: '1',
+					sku: 'a'
+				}]
+			};
+			var expression = {
+				customerName: v.isString,
+				items: [{
+					no: v.isString,
+					sku: v.isNumber
+				}]
+			};
+			var ret = v.hasErrors(target, expression);
+			console.log(ret);
+			expect(ret.length).to.equal(2);
+			expect(ret).is.include('it.items[1].sku is not number');
+			expect(ret).is.include('it.items[0].no is not string');
+		});
+
+		it('array object validation express with array target, and valid data should pass', function() {
+			var target = {
+				customerName: 'ron',
+				items: [{
+					no: '1',
+					sku: 123
+				}]
+			};
+			var expression = {
+				customerName: v.isString,
+				items: [{
+					no: v.isString,
+					sku: v.isNumber
+				}]
+			};
+			var ret = v.hasErrors(target, expression);
+			console.log(ret);
+			expect(ret).is.equal(null);
 		});
 	});
 })
