@@ -249,7 +249,7 @@
 			return m.sprintf('%s must be one of (%s)', name,
 				u.reduce(params, function(whole, opt) {return m.sprintf('%s, %s', whole, opt);}));
 		}
-	));
+	), true);
 	ret.register('minLength', ret.build(
 		function(value, params) {
 			var min = u.first(params);
@@ -257,7 +257,7 @@
 			return u.isString(value) && value.length >= min;
 		},
 		function(name, params) {return m.sprintf('%s must be a string and have at least %s characters', name, params[0]); }
-	));
+	), true);
 
 	return ret;
 });

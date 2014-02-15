@@ -73,7 +73,17 @@ describe('built-in validators:', function() {
 
 		it('contained should pass', function() {
 			expect(v.hasErrors('red', v.isIn(['red', 'blue']))).to.equal(null);
-		})
+		});
+
+		it('without params should throw', function(done) {
+			try {
+				expect(v.hasErrors('red', v.isIn)).to.equal(null);
+			}
+			catch (e) {
+				expect(e).to.equal('invalid validation expression: it');
+				done();
+			}
+		});
 	});
 
 	describe('minLength', function() {
