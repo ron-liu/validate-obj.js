@@ -56,27 +56,27 @@ describe('built-in validators:', function() {
 
 	describe('isIn:', function() {
 		it('undefined should pass', function() {
-			expect(v.hasErrors(undefined, v.isIn(null, {options: ['red','blue']}))).to.equal(null);
+			expect(v.hasErrors(undefined, v.isIn(['red','blue']))).to.equal(null);
 		});
 
 		it('not contained should not pass', function() {
-			expect(v.hasErrors('yellow', v.isIn(null, {options: ['red', 'blue']}))).to.include('it must be one of (red, blue)');
+			expect(v.hasErrors('yellow', v.isIn(['red', 'blue']))).to.include('it must be one of (red, blue)');
 		});
 
 		it('contained should pass', function() {
-			expect(v.hasErrors('red', v.isIn(null, {options: ['red', 'blue']}))).to.equal(null);
+			expect(v.hasErrors('red', v.isIn(['red', 'blue']))).to.equal(null);
 		})
 	});
 
 	describe('minLength', function() {
 		it('int should not pass', function() {
-			expect(v.hasErrors(1, v.minLength(null, {min: 3}))).to.include('it must be a string and have at least 3 characters');
+			expect(v.hasErrors(1, v.minLength([3]))).to.include('it must be a string and have at least 3 characters');
 		});
 		it('3 length should pass', function() {
-			expect(v.hasErrors('abc', v.minLength(null, {min: 3}))).to.equal(null);
+			expect(v.hasErrors('abc', v.minLength([3]))).to.equal(null);
 		})
 		it('2 length should not pass', function() {
-			expect(v.hasErrors('ab', v.minLength(null, {min: 3}))).to.include('it must be a string and have at least 3 characters');
+			expect(v.hasErrors('ab', v.minLength([3]))).to.include('it must be a string and have at least 3 characters');
 		});
 	})
 });

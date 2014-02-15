@@ -119,7 +119,6 @@ describe('nested obj', function() {
 				}]
 			};
 			var ret = v.hasErrors(target, expression);
-			console.log(ret);
 			expect(ret).is.include('it.items is not array');
 		});
 
@@ -139,7 +138,6 @@ describe('nested obj', function() {
 				}]
 			};
 			var ret = v.hasErrors(target, expression);
-			console.log(ret);
 			expect(ret.length).to.equal(1);
 			expect(ret).is.include('it.items[0].sku is not number');
 		});
@@ -163,7 +161,6 @@ describe('nested obj', function() {
 				}]
 			};
 			var ret = v.hasErrors(target, expression);
-			console.log(ret);
 			expect(ret.length).to.equal(2);
 			expect(ret).is.include('it.items[1].sku is not number');
 			expect(ret).is.include('it.items[0].no is not string');
@@ -185,7 +182,6 @@ describe('nested obj', function() {
 				}]
 			};
 			var ret = v.hasErrors(target, expression);
-			console.log(ret);
 			expect(ret).is.equal(null);
 		});
 	});

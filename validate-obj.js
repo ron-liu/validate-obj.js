@@ -16,16 +16,16 @@
 		isObject : function(o) {
 			return typeof o === "object";
 		},
-		each: function(obj, fn) {
-			if (u.isArray(obj)) {
-				for(var i = 0; i < obj.length; i ++) {
-					fn(obj[i], i);
+		each: function(collection, fn) {
+			if (u.isArray(collection)) {
+				for(var i = 0; i < collection.length; i ++) {
+					fn(collection[i], i);
 				}
 				return;
 			}
 
-			for(var name in obj) {
-				fn(obj[name], name);
+			for(var name in collection) {
+				fn(collection[name], name);
 			}
 		},
 		contains: function(array, k) {
@@ -87,19 +87,13 @@
 			for(var i = 0; i < n; i ++) ret.push(i);
 			return ret;
 		},
-		map: function(list, fn) {
+		map: function(collection, fn) {
 			var ret = [];
 
-			if (u.isArray(list)) {
-				for (var i = 0; i < list.length; i ++) {
-					ret.push(fn(list[i], i));
-				}
-				return ret;
-			}
+			u.each(collection, function(value, key) {
+				ret.push(fn(value, key));
+			});
 
-			for (var item in list) {
-				ret.push(fn(list[item], item));
-			}
 			return ret;
 		},
 		filter: function(list, fn) {
@@ -109,7 +103,15 @@
 			}
 			return ret;
 		},
-		identity: function(i) {return i;}
+		identity: function(i) {return i;},
+		find: function(collection, fn) {
+			var ret = undefined;
+			u.each(collection, function(item) {
+				if (fn(item)) ret = item;
+			});
+			return ret;
+		},
+		first: function(list) {return list[0];}
 	}; // small set of underscore
 	var m = {
 		emptyToNull: function(list) {
@@ -186,20 +188,10 @@
 				}), function(a,b){return u.union(a, b)})));
 			}
 
-
 			if (!u.isObject(validatorObj)) throw m.sprintf("invalid validation expression: %s", name);
 			u.each(validatorObj, function (validators, propName) {
 				errs = u.union(errs, ret.hasErrors((m.existy(obj) ? obj : {})[propName], validators, name + '.' + propName))
 			});
-
-//			if (u.isArray(obj)) {
-//				u.each(obj, function(o, no) {
-//					u.each(validatorObj, function (validators, propName) {
-//						errs = u.union(errs, ret.hasErrors((obj[no] || {})[propName], validators, m.sprintf('%s[%s].%s', name, no, propName)))
-//					});
-//				})
-//				return m.emptyToNull(errs);
-//			}
 
 			return m.emptyToNull(errs);
 		},
@@ -216,7 +208,9 @@
 			if (!u.isFunction(func)) throw 'the passing argument is not a function';
 			name = name || func.name;
 			if (!name) throw  'the passing argument has no name';
-			var highOrderFunc = function(err, params) {
+			var highOrderFunc = function() { // err, params both optional, but err must be a function or string, params must be array
+				var err = u.find(arguments, function(item) {return u.isString(item) || u.isFunction(item)});
+				var params = u.find(arguments, u.isArray);
 				var ret = function(value, name) {
 					return func(value, name, err, params);
 				};
@@ -254,15 +248,21 @@
 		function(name) {return m.sprintf('%s is not number', name);}
 	));
 	ret.register('isIn',ret.build(
-		function (value, params) { return u.contains(params.options, value); },
+		function (value, params) {
+			return u.contains(params, value);
+		},
 		function (name, params) {
 			return m.sprintf('%s must be one of (%s)', name,
-				u.reduce(params.options, function(whole, opt) {return m.sprintf('%s, %s', whole, opt);}));
+				u.reduce(params, function(whole, opt) {return m.sprintf('%s, %s', whole, opt);}));
 		}
 	));
 	ret.register('minLength', ret.build(
-		function(value, params) {return u.isString(value) && value.length >= params.min;},
-		function(name, params) {return m.sprintf('%s must be a string and have at least %s characters', name, params.min); }
+		function(value, params) {
+			var min = u.first(params);
+			if (!u.isNumber(min)) throw m.sprintf('minLength must have one number in the params array')
+			return u.isString(value) && value.length >= min;
+		},
+		function(name, params) {return m.sprintf('%s must be a string and have at least %s characters', name, params[0]); }
 	));
 
 	return ret;
