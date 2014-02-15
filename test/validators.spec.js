@@ -63,6 +63,14 @@ describe('built-in validators:', function() {
 			expect(v.hasErrors('yellow', v.isIn(['red', 'blue']))).to.include('it must be one of (red, blue)');
 		});
 
+		it('not contained should not pass with custom string err', function() {
+			expect(v.hasErrors('yellow', v.isIn('color is invalid', ['red', 'blue']))).to.include('color is invalid');
+		});
+
+		it('not contained should not pass with custom func err', function() {
+			expect(v.hasErrors('yellow', v.isIn(function(name){return name + ' is not a valid color'}, ['red', 'blue']))).to.include('it is not a valid color');
+		});
+
 		it('contained should pass', function() {
 			expect(v.hasErrors('red', v.isIn(['red', 'blue']))).to.equal(null);
 		})

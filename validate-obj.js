@@ -12,7 +12,7 @@
 	}
 })('validate-obj', function (validator) {
 	var funcAttrName = '__validator-obj__';
-	var u = {
+	var u = { // small set of underscore
 		isObject : function(o) {
 			return typeof o === "object";
 		},
@@ -112,8 +112,8 @@
 			return ret;
 		},
 		first: function(list) {return list[0];}
-	}; // small set of underscore
-	var m = {
+	};
+	var m = { // internal functions
 		emptyToNull: function(list) {
 			var ret = u.filter(list, u.identity);
 			return u.some(ret) ? ret : null;
@@ -153,7 +153,7 @@
 				return (m.isConcrete(v) || (m.isHighOrder(v) && !m.needParams(v)));
 			}
 		}
-	}; // internal functions
+	};
 
 	var ret = {
 		hasErrors: function (obj, validatorObj, name, errs) {
@@ -196,12 +196,6 @@
 			return m.emptyToNull(errs);
 		},
 
-		// validator could have the following format:
-		// v.func;
-		// {validator: v.func, err: 'this is wrong'};
-		// {validator: v.func, err: function(propName) {...}}
-		// {validator: v.func, {...}
-		// and array of the above
 		isValidationExpression: m.isValidationExpression,
 
 		register : function(name, func, needParams) {
@@ -210,7 +204,7 @@
 			if (!name) throw  'the passing argument has no name';
 			var highOrderFunc = function() { // err, params both optional, but err must be a function or string, params must be array
 				var err = u.find(arguments, function(item) {return u.isString(item) || u.isFunction(item)});
-				var params = u.find(arguments, u.isArray);
+				var params = u.find(arguments, u.isArray) || [];
 				var ret = function(value, name) {
 					return func(value, name, err, params);
 				};
