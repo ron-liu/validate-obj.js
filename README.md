@@ -58,7 +58,7 @@ var validationExpression = {
    createdOn: v.isDate
 };
 
-var errs = v.validateObj(myUserForm, validationExpression);
+var errs = v.hasErrors(myUserForm, validationExpression);
 ```
 **It is beautiful, isn't it? and even we save this validation sytax object and reuse it.**
 
