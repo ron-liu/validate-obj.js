@@ -106,7 +106,7 @@ v.hasErrors(['a', 'b'], [[v.isString]]) // ==> null
 ### To validate object
 ``` javascript
 v.hasErrors({name: 'john', age: 27}, {name: v.isString, age: v.isNumber}) // ==> null
-* v.hasErrors({name: 'john', age: '27'}, {name: v.isString, age: v.isNumber}) // ==> ['it.age is not number']
+v.hasErrors({name: 'john', age: '27'}, {name: v.isString, age: v.isNumber}) // ==> ['it.age is not number']
 ```
 
 ### To validate complex object
@@ -138,6 +138,7 @@ v.hasErrors(
 
 ### To extend, add custom validators
 * With auto error message
+
 ``` javascript
 v.register('isGender', 
 	function(value) {
@@ -147,7 +148,9 @@ v.register('isGender',
 v.hasErrors('male', v.isGender) // ==> null
 v.hasErrors('middle', v.isGender) // ==> ['it is invalid']
 ```
+
 * With error message
+
 ``` javascript
 v.register('isGender', v.build(
 	function(value) {
