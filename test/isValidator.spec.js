@@ -8,10 +8,10 @@ describe('isValidationExpression', function() {
 		expect(v.isValidationExpression(f)).to.equal(true);
 	});
 
-	it('high order func with params needed should NOT ok', function() {
+	it('high order func should NOT ok', function() {
 		var f = function(){};
-		f['__validator-obj__'] = {type: 'highOrder', needParams: true};
-		expect(v.isValidationExpression(f)).to.equal(false);
+		f['__validator-obj__'] = {type: 'highOrder'};
+		expect(v.isValidationExpression(f)).to.equal(true);
 
 	});
 

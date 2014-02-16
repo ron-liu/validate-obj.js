@@ -80,7 +80,8 @@ describe('built-in validators:', function() {
 				expect(v.hasErrors('red', v.isIn)).to.equal(null);
 			}
 			catch (e) {
-				expect(e).to.equal('invalid validation expression: it');
+				console.log(e);
+				expect(e).to.equal('isIn has to have a array options parameter like v.isIn([\'option1\', \'option2\'])');
 				done();
 			}
 		});

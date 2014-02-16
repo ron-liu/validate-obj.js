@@ -17,14 +17,12 @@ describe('register:', function() {
 				return typeof err === 'string' ? err : err(name);
 			}
 			return true;
-		}, false);
+		});
 
 		expect(v.testRequired['__validator-obj__'].type).to.equal('highOrder');
-		expect(v.testRequired['__validator-obj__'].needParams).to.equal(false);
 
 		var f = v.testRequired('ppp');
 		expect(f['__validator-obj__'].type).to.equal('concrete');
-		expect(f['__validator-obj__'].needParams).to.equal(false);
 
 		expect(f(undefined, 'age')).to.equal('ppp');
 

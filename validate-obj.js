@@ -138,9 +138,6 @@
 		isHighOrder: function(func) {
 			return u.has(func, funcAttrName) && func[funcAttrName].type === 'highOrder';
 		},
-		needParams: function(func) {
-			return u.has(func, funcAttrName) && func[funcAttrName].needParams;
-		},
 		funcName : function(func) {
 			return u.has(func, funcAttrName) && func[funcAttrName].name;
 		},
@@ -150,7 +147,7 @@
 
 			function _isValidator(v) {
 				if(!u.isFunction(v)) return false;
-				return (m.isConcrete(v) || (m.isHighOrder(v) && !m.needParams(v)));
+				return (m.isConcrete(v) || (m.isHighOrder(v)));
 			}
 		}
 	};
@@ -198,20 +195,20 @@
 
 		isValidationExpression: m.isValidationExpression,
 
-		register : function(name, func, needParams) {
+		register : function(name, func) {
 			if (!u.isFunction(func)) throw 'the passing argument is not a function';
 			name = name || func.name;
 			if (!name) throw  'the passing argument has no name';
 			var highOrderFunc = function() { // err, params both optional, but err must be a function or string, params must be array
 				var err = u.find(arguments, function(item) {return u.isString(item) || u.isFunction(item)});
-				var params = u.find(arguments, u.isArray) || [];
+				var params = u.find(arguments, u.isArray);
 				var ret = function(value, name) {
 					return func(value, name, err, params);
 				};
-				ret[funcAttrName] = {type:'concrete', needParams: !!needParams, name: name};
+				ret[funcAttrName] = {type:'concrete',  name: name};
 				return ret;
 			};
-			highOrderFunc[funcAttrName] = {type:'highOrder', needParams: !!needParams};
+			highOrderFunc[funcAttrName] = {type:'highOrder'};
 			ret[name] = highOrderFunc;
 		},
 
@@ -243,13 +240,14 @@
 	));
 	ret.register('isIn',ret.build(
 		function (value, params) {
+			if(!u.isArray(params)) throw m.sprintf('isIn has to have a array options parameter like v.isIn([\'option1\', \'option2\'])');
 			return u.contains(params, value);
 		},
 		function (name, params) {
 			return m.sprintf('%s must be one of (%s)', name,
 				u.reduce(params, function(whole, opt) {return m.sprintf('%s, %s', whole, opt);}));
 		}
-	), true);
+	));
 	ret.register('minLength', ret.build(
 		function(value, params) {
 			var min = u.first(params);
@@ -257,7 +255,7 @@
 			return u.isString(value) && value.length >= min;
 		},
 		function(name, params) {return m.sprintf('%s must be a string and have at least %s characters', name, params[0]); }
-	), true);
+	));
 
 	return ret;
 });
