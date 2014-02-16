@@ -43,13 +43,22 @@ if (typeof myUserForm.gender !== undefined && !validator.isIn(myUserForm.gender,
 **Are you tired of the above? How about we just simply do the following?**
 ```javascript
 var v = require('validate-obj');
-var errs = v.validateObj(myUserForm, {
+var myUserForm = {
+	name: 'John', // required, string
+	email: 'Jonh@emailDomain.com', // required, email
+	age: 27, // int
+	gender: 'male', // male or female
+	createdOn: '10/12/1987'
+};
+var validationExpression = {
    name: [v.required, v.isString],
    email: [v.required, v.isEmail],
    age: v.isNumber,
    gender: v.isIn(['male', 'female']),
    createdOn: v.isDate
-});
+};
+
+var errs = v.validateObj(myUserForm, validationExpression);
 ```
 **It is beautiful, isn't it? and even we save this validation sytax object and reuse it.**
 
