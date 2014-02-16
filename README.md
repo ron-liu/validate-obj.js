@@ -67,56 +67,99 @@ var errs = v.validateObj(myUserForm, {
 ## APIs
 
 ### Overview
-* var v = require('validate-obj'); 
-load the library, to make it short, I will not include it in the following examples
-* v.hasErrors(target, validationExpression)
-	* target: the object going to be validated
-	* validationExpression: the validation defination indicating how to validat
-	* erturn value: null means no errors or array of error string
+``` javascript
+var v = require('validate-obj'); //load the library, to make it short, I will not include it in the following examples
+
+// target: the object going to be validated
+// validationExpression: the validation defination indicating how to validat
+// erturn value: null means no errors or array of error string
+v.hasErrors(target, validationExpression)
+```
 	
 ### To validate simple variables
-* v.hasErrors(1, v.isNumber) // ==> null
-* v.hasErrors('a', v.isNumber) // ==> ['it is not number']
-* v.hasErrors('male', v.isIn(['male', 'female'])) // ==> null
-* v.hasErrors('middle', v.isIn(['male', 'female'])) // ==> ['it must be one of (male, female)']
+``` javascript
+v.hasErrors(1, v.isNumber) // ==> null
+v.hasErrors('a', v.isNumber) // ==> ['it is not number']
+v.hasErrors('male', v.isIn(['male', 'female'])) // ==> null
+v.hasErrors('middle', v.isIn(['male', 'female'])) // ==> ['it must be one of (male, female)']
+```
 
 ### To override the error message
-* v.hasErrors('a', v.isNumber('age should be a number')) // ==> ['age should be a number']
-* v.hasErrors('middle', v.isIn(['male', 'female'], 'gender has to be male or female')) // ==> ['gender has to be male or female']
-* v.hasErrors('middle', v.isIn('gender has to be male or female', ['male', 'female'])) // ==> ['gender has to be male or female']
+``` javascript
+v.hasErrors('a', v.isNumber('age should be a number')) // ==> ['age should be a number']
+v.hasErrors('middle', v.isIn(['male', 'female'], 'gender has to be male or female')) // ==> ['gender has to be male or female']
+v.hasErrors('middle', v.isIn('gender has to be male or female', ['male', 'female'])) // ==> ['gender has to be male or female']
+```
 
 ### Validate with multiple validators
-* v.hasErrors('a', [v.required, v.isString])) // ==> null
-* v.hasErrors(undefined, [v.isRequired, v.isNumber]) // ==> ['it is required']
-
+``` javascript
+v.hasErrors('a', [v.required, v.isString])) // ==> null
+v.hasErrors(undefined, [v.isRequired, v.isNumber]) // ==> ['it is required']
+```
 
 ### To validate array
-* v.hasErrors('a', [[v.isString]]) // ==> it is not array
-* v.hasErrors(['a', 'b'], [[v.isString]]) // ==> null
+``` javascript
+v.hasErrors('a', [[v.isString]]) // ==> it is not array
+v.hasErrors(['a', 'b'], [[v.isString]]) // ==> null
+```
 
 ### To validate object
-* v.hasErrors({name: 'john', age: 27}, {name: v.isString, age: v.isNumber}) // ==> null
+``` javascript
+v.hasErrors({name: 'john', age: 27}, {name: v.isString, age: v.isNumber}) // ==> null
 * v.hasErrors({name: 'john', age: '27'}, {name: v.isString, age: v.isNumber}) // ==> ['it.age is not number']
+```
 
 ### To validate complex object
-* v.hasErrors({name: 'john', orderNumber: 12345, items: [{sku: 222, quantity: 2}]},
-	{name: v.isString, orderNumber: v.isNumber, items: [{ sku: v.isNumber, quantity: v.isNumber}]}) // ==> null
-* v.hasErrors({name: 'john', orderNumber: 12345, items: [{sku: '123', quantity: 2}]},
-			{name: v.isString, orderNumber: v.isNumber, items: [{ sku: v.isNumber, quantity: v.isNumber}]}) // ==> ['it.items[0].sku is not number']
+``` javascript
+v.hasErrors(
+	{
+		name: 'john', 
+		orderNumber: 12345, 
+		items: [{sku: 222, quantity: 2}]
+	},
+	{
+		name: v.isString, 
+		orderNumber: v.isNumber, 
+		items: [{ sku: v.isNumber, quantity: v.isNumber}]
+	}) // ==> null
+	
+v.hasErrors(
+	{
+		name: 'john', 
+		orderNumber: 12345, 
+		items: [{sku: '123', quantity: 2}]
+	},
+	{
+		name: v.isString, 
+		orderNumber: v.isNumber, 
+		items: [{ sku: v.isNumber, quantity: v.isNumber}]
+	}) // ==> ['it.items[0].sku is not number']
+```
 
-## To extend, add custom validators
+### To extend, add custom validators
 * With auto error message
-v.register('isGender', function(value) {return value ==='male' || value ==='female'});
+``` javascript
+v.register('isGender', 
+	function(value) {
+		return value ==='male' || value ==='female'
+	}
+);
 v.hasErrors('male', v.isGender) // ==> null
 v.hasErrors('middle', v.isGender) // ==> ['it is invalid']
+```
 * With error message
-* v.register('isGender', v.build(
-				function(value) {return value ==='male' || value ==='female';},
-				function(name) {return  name + ' is not gender'}
-			));
-			v.hasErrors('male', v.isGender); // ==> null
-			v.hasErrors('middle', v.isGender) // ==> ['it is not gender']
-
+``` javascript
+v.register('isGender', v.build(
+	function(value) {
+		return value ==='male' || value ==='female';
+	},
+	function(name) {
+		return  name + ' is not gender'
+	}
+));
+v.hasErrors('male', v.isGender); // ==> null
+v.hasErrors('middle', v.isGender) // ==> ['it is not gender']
+```
 
 ### Built-in validators
 * required
@@ -126,3 +169,5 @@ v.hasErrors('middle', v.isGender) // ==> ['it is invalid']
 * isIn
 * minLength
 
+## Progress
+The whole framework is done, the only missing is not enough built-in validators. I will add more soon. 
