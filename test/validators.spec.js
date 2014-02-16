@@ -81,7 +81,7 @@ describe('built-in validators:', function() {
 			}
 			catch (e) {
 				console.log(e);
-				expect(e).to.equal('isIn has to have a array options parameter like v.isIn([\'option1\', \'option2\'])');
+				expect(e).to.equal('it: isIn has to have a array options parameter like v.isIn([\'option1\', \'option2\'])');
 				done();
 			}
 		});

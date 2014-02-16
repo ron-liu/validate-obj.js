@@ -217,7 +217,12 @@
 			if (!u.isFunction(validateFn) || !u.isFunction(errFn)) throw 'validateFn and errFn are required';
 			return function(value, name, err, params) {
 				err = err || errFn;
-				return validateFn(value, params) ? null : (u.isString(err) ? err : err(name, params));
+				try {
+					return validateFn(value, params) ? null : (u.isString(err) ? err : err(name, params));
+				}
+				catch(e) {
+					throw m.sprintf('%s: %s', name, e);
+				}
 			};
 		}
 	};
@@ -250,9 +255,8 @@
 	));
 	ret.register('minLength', ret.build(
 		function(value, params) {
-			var min = u.first(params);
-			if (!u.isNumber(min)) throw m.sprintf('minLength must have one number in the params array')
-			return u.isString(value) && value.length >= min;
+			if(!u.isArray(params) || params.length !== 1 || !u.isNumber(u.first(params))) throw m.sprintf('minLengTh MUST have one number in the params array');
+			return u.isString(value) && value.length >= u.first(params);
 		},
 		function(name, params) {return m.sprintf('%s must be a string and have at least %s characters', name, params[0]); }
 	));
