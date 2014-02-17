@@ -261,6 +261,29 @@
 		},
 		function(name, params) {return m.sprintf('%s must be a string and have at least %s characters', name, params[0]); }
 	));
+	ret.register('maxLength', ret.build(
+		function(value, params) {
+			if(!u.isArray(params) || params.length !== 1 || !u.isNumber(u.first(params))) throw m.sprintf('maxLengTh MUST have one number in the params array');
+			return u.isString(value) && value.length <= u.first(params);
+		},
+		function(name, params) {return m.sprintf('%s must be a string and have at most %s characters', name, params[0]); }
+	));
+	ret.register('isEmail', ret.build(
+		function(value) {
+			// This magic string is coming from http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+			var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+			return re.test(value);
+		},
+		function(name) {return m.sprintf('%s is not email', name);}
+	));
+	ret.register('isCreditCard', ret.build(
+		function(value){
+			// This magic string is coming from http://www.informit.com/articles/article.aspx?p=1223879&seqNum=12
+			var re = /^(5[1-5]\d{14})|(4\d{12}(\d{3})?)|(3[47]\d{13})|(6011\d{14})|((30[0-5]|36\d|38\d)\d{11})$/;
+			return re.test(value);
+		},
+		function(name) {return m.sprintf('%s is not credit card number', name);}
+	));
 
 	return ret;
 });

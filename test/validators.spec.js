@@ -86,7 +86,7 @@ describe('built-in validators:', function() {
 		});
 	});
 
-	describe('minLength', function() {
+	describe('minLength:', function() {
 		it('int should not pass', function() {
 			expect(v.hasErrors(1, v.minLength([3]))).to.include('it must be a string and have at least 3 characters');
 		});
@@ -95,6 +95,48 @@ describe('built-in validators:', function() {
 		})
 		it('2 length should not pass', function() {
 			expect(v.hasErrors('ab', v.minLength([3]))).to.include('it must be a string and have at least 3 characters');
+		});
+	});
+
+	describe('isEmail', function() {
+		it('valid email should pass', function() {
+			expect(v.hasErrors('john@gmail.com', v.isEmail)).to.equal(null);
+			expect(v.hasErrors('john.hacker@gmail.com', v.isEmail)).to.equal(null);
+			expect(v.hasErrors('john+1@gmail.com', v.isEmail)).to.equal(null);
+		});
+		it('invalid email should not pass', function() {
+			expect(v.hasErrors('johngmail.com', v.isEmail)).to.include('it is not email');
+			expect(v.hasErrors('john.hacker@', v.isEmail)).to.include('it is not email');
+			expect(v.hasErrors('john.hacker@gmail', v.isEmail)).to.include('it is not email');
+			expect(v.hasErrors('@gmail.com', v.isEmail)).to.include('it is not email');
+		});
+
+	});
+
+	describe('maxLength:', function() {
+		it('int should not pass', function() {
+			expect(v.hasErrors(1, v.maxLength([3]))).to.include('it must be a string and have at most 3 characters');
+		});
+		it('3 length should pass', function() {
+			expect(v.hasErrors('abc', v.maxLength([3]))).to.equal(null);
+		})
+		it('4 length should not pass', function() {
+			expect(v.hasErrors('abcd', v.maxLength([3]))).to.include('it must be a string and have at most 3 characters');
+		});
+	});
+
+	describe('isCredit', function() {
+		it('valid credit card should pass', function() {
+			expect(v.hasErrors('5212345678901234', v.isCreditCard)).to.equal(null); // mastercard
+			expect(v.hasErrors('4123456789012', v.isCreditCard)).to.equal(null); // visa 1
+			expect(v.hasErrors('4123456789012345', v.isCreditCard)).to.equal(null); // visa 2
+			expect(v.hasErrors('371234567890123', v.isCreditCard)).to.equal(null); // amex
+			expect(v.hasErrors('601112345678901234', v.isCreditCard)).to.equal(null); // diners club
+			expect(v.hasErrors('38812345678901', v.isCreditCard)).to.equal(null);
+		});
+		it('invalid credit card should not pass', function() {
+			expect(v.hasErrors('aa444433332222', v.isCreditCard)).to.include('it is not credit card number');
+			expect(v.hasErrors('dfdsafdasfds', v.isCreditCard)).to.include('it is not credit card number');
 		});
 	})
 });
