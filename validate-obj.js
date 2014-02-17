@@ -13,9 +13,6 @@
 })('validate-obj', function (validator) {
 	var funcAttrName = '__validator-obj__';
 	var u = { // small set of underscore
-		isObject : function(o) {
-			return typeof o === "object";
-		},
 		each: function(collection, fn) {
 			if (u.isArray(collection)) {
 				for(var i = 0; i < collection.length; i ++) {
@@ -28,24 +25,57 @@
 				fn(collection[name], name);
 			}
 		},
-		contains: function(array, k) {
-			for(var item in array) {
-				if (k === array[item]) return true;
-			}
-			return false;
-		},
-		reduce: function(array, fn, memo) {
-			var ret = memo || array[0],
-				hasMemo = !!memo;
+		map: function(collection, fn) {
+			var ret = [];
 
-			for (var i = hasMemo ? 0 : 1; i < array.length; i ++)	{
-				ret = fn(ret, array[i]);
+			u.each(collection, function(value, key) {
+				ret.push(fn(value, key));
+			});
+
+			return ret;
+		},
+		isObject : function(o) {
+			return typeof o === "object";
+		},
+		contains: function(collection, k) {
+			var found = false;
+			u.each(collection, function(item) {
+				if (k === item) found = true;
+			});
+			return found;
+		},
+		every: function(collection, fn) {
+			var result = true;
+			u.each(collection, function(item) {
+				if (!fn(item)) result = false;
+			});
+			return result;
+		},
+		filter: function(collection, fn) {
+			var ret = [];
+			u.each(collection, function(item) {
+				if (fn(item)) ret.push(item);
+			})
+			return ret;
+		},
+		find: function(collection, fn) {
+			var ret = undefined;
+			u.each(collection, function(item) {
+				if (fn(item)) ret = item;
+			});
+			return ret;
+		},
+		reduce: function(list, fn, memo) {
+			var ret = memo || list[0],
+				hasMemo = !!memo;
+			for (var i = hasMemo ? 0 : 1; i < list.length; i ++)	{
+				ret = fn(ret, list[i]);
 			}
 			return ret;
 		},
-		some: function(a) {
-			if (!u.isArray(a)) return false;
-			return a.length > 0;
+		some: function(list) {
+			if (!u.isArray(list)) return false;
+			return list.length > 0;
 		},
 		isArray: function(a) {
 			return Object.prototype.toString.call(a) === "[object Array]";
@@ -62,16 +92,10 @@
 		isFunction: function(f) {
 			return typeof f === 'function';
 		},
-		every: function(list, fn) {
-			for(var item in list) {
-				if (!fn(list[item])) return false;
-			}
-			return true;
-		},
 		has: function(obj, propName) {
 			return obj.hasOwnProperty(propName);
 		},
-		union: function() {
+		union: function(/*list of lists*/) {
 			var ret = [];
 			u.each(arguments, function(argument, name) {
 				if (!m.existy(argument)) return;
@@ -87,30 +111,7 @@
 			for(var i = 0; i < n; i ++) ret.push(i);
 			return ret;
 		},
-		map: function(collection, fn) {
-			var ret = [];
-
-			u.each(collection, function(value, key) {
-				ret.push(fn(value, key));
-			});
-
-			return ret;
-		},
-		filter: function(list, fn) {
-			var ret = [];
-			for (var item in list) {
-				if (fn(list[item]))	ret.push(list[item]);
-			}
-			return ret;
-		},
 		identity: function(i) {return i;},
-		find: function(collection, fn) {
-			var ret = undefined;
-			u.each(collection, function(item) {
-				if (fn(item)) ret = item;
-			});
-			return ret;
-		},
 		first: function(list) {return list[0];}
 	};
 	var m = { // internal functions
@@ -153,41 +154,41 @@
 	};
 
 	var ret = {
-		hasErrors: function (obj, validatorObj, name, errs) {
-			var errs = errs || [];
-			name = name || 'it';
+		hasErrors: function (target, validationExpression /*, name, errs*/) {
+			var name = arguments[2] || 'it'; // used to recursive call and calculate the full name
+			var errs = arguments[3] || []; // used to recursive call and collect the errors
 
-			function _validate(validators, value, name) {
-				if (!u.isArray(validators)) validators = [validators];
+			function _validate(expression, value, name) {
+				if (!u.isArray(expression)) expression = [expression];
 				return u.filter(
-					u.map(validators, function (validator) {
+					u.map(expression, function (validator) {
 						if (m.isHighOrder(validator)) validator = validator();
 						if (!m.existy(value) && m.funcName(validator) !== 'required') return null;
 						return validator(value, name);
 					}), u.identity);
 			}
 
-			if (m.isValidationExpression(validatorObj))	{
-				return m.emptyToNull(u.union(errs, _validate(validatorObj, obj, name)));
+			if (m.isValidationExpression(validationExpression))	{
+				return m.emptyToNull(u.union(errs, _validate(validationExpression, target, name)));
 			}
 
-			if (u.isArray(validatorObj)) {
-				if (validatorObj.length !== 1) throw 'array validation expression must have one and only one validation expression, like [[v.required, v.isString]]';
-				if(!u.isArray(obj)) return [m.sprintf('%s is not array', name)];
-				if(!m.isValidationExpression(validatorObj[0])) {
-					u.each(obj, function(o, no) {
-						errs = u.union(errs, ret.hasErrors((m.existy(o) ? o : {}), validatorObj[0], m.sprintf('%s[%s]', name, no)));
+			if (u.isArray(validationExpression)) {
+				if (validationExpression.length !== 1) throw 'array validation expression must have one and only one validation expression, like [[v.required, v.isString]]';
+				if(!u.isArray(target)) return [m.sprintf('%s is not array', name)];
+				if(!m.isValidationExpression(validationExpression[0])) {
+					u.each(target, function(o, no) {
+						errs = u.union(errs, ret.hasErrors((m.existy(o) ? o : {}), validationExpression[0], m.sprintf('%s[%s]', name, no)));
 					})
 					return m.emptyToNull(errs);
 				}
-				return m.emptyToNull(u.union(errs, u.reduce(u.map(obj, function(item, i){
-					return _validate(validatorObj[0], item, m.sprintf('%s[%s]', name, i));
+				return m.emptyToNull(u.union(errs, u.reduce(u.map(target, function(item, i){
+					return _validate(validationExpression[0], item, m.sprintf('%s[%s]', name, i));
 				}), function(a,b){return u.union(a, b)})));
 			}
 
-			if (!u.isObject(validatorObj)) throw m.sprintf("invalid validation expression: %s", name);
-			u.each(validatorObj, function (validators, propName) {
-				errs = u.union(errs, ret.hasErrors((m.existy(obj) ? obj : {})[propName], validators, name + '.' + propName))
+			if (!u.isObject(validationExpression)) throw m.sprintf("invalid validation expression: %s", name);
+			u.each(validationExpression, function (validators, propName) {
+				errs = u.union(errs, ret.hasErrors((m.existy(target) ? target : {})[propName], validators, name + '.' + propName))
 			});
 
 			return m.emptyToNull(errs);
