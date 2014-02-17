@@ -1,4 +1,4 @@
-//     validate-obj.js 1.5.2
+//     validate-obj.js
 //     (c) 2014 Ron Liu
 //     validate-obj may be freely distributed under the MIT license.
 
