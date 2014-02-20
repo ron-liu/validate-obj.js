@@ -138,7 +138,8 @@ describe('built-in validators:', function() {
 			expect(v.hasErrors('aa444433332222', v.isCreditCard)).to.include('it is not credit card number');
 			expect(v.hasErrors('dfdsafdasfds', v.isCreditCard)).to.include('it is not credit card number');
 		});
-	})
+	});
+
 	describe('isUrl', function() {
 		it('valid url should pass', function() {
 			expect(v.hasErrors('http://www.google.com', v.isUrl)).to.equal(null);
@@ -151,6 +152,22 @@ describe('built-in validators:', function() {
 			expect(v.hasErrors('httpp://www.google.com', v.isUrl)).to.include('it is not url');
 			//expect(v.hasErrors('http://www .yahoo.com', v.isUrl)).to.include('it is not url');
 		});
-	})
+	});
 
-});
+	describe('isBefore', function() {
+		it('valid should pass', function () {
+			expect(v.hasErrors(new Date(2014,1,21,10,30,0), v.isBefore([new Date(2014,1,21,10,31,0)]))).to.equal(null);
+		});
+		it('invalid should pass', function () {
+			expect(v.hasErrors(new Date(2014,1,21,10,30,0), v.isBefore([new Date(2014,1,21,10,29,0)]))).to.include('it is not before');
+		});
+	});
+
+	describe('isAfter', function() {
+		it('valid should pass', function () {
+			expect(v.hasErrors(new Date(2014,1,21,10,30,0), v.isAfter([new Date(2014,1,21,10,29,0)]))).to.equal(null);
+		});
+		it('invalid should pass', function () {
+			expect(v.hasErrors(new Date(2014,1,21,10,30,0), v.isAfter([new Date(2014,1,21,10,31,0)]))).to.include('it is not after');
+		});
+	});});

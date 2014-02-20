@@ -291,6 +291,21 @@
 		},
 		function(name){return m.sprintf('%s is not url', name);}
 	));
-
+	ret.register('isBefore', ret.build(
+		function(value, params) {
+			console.log(value);
+			if(!u.isArray(params) || params.length !==1 || !u.isDate(u.first(params))) throw m.sprintf('isBefore must have one date in the params array');
+			return value < u.first(params);
+		},
+		function(name) {return m.sprintf('%s is not before', name);}
+	));
+	ret.register('isAfter', ret.build(
+		function(value, params) {
+			console.log(value);
+			if(!u.isArray(params) || params.length !==1 || !u.isDate(u.first(params))) throw m.sprintf('isAfter must have one date in the params array');
+			return value > u.first(params);
+		},
+		function(name) {return m.sprintf('%s is not after', name);}
+	));
 	return ret;
 });
