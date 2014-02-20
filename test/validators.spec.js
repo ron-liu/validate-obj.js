@@ -139,4 +139,18 @@ describe('built-in validators:', function() {
 			expect(v.hasErrors('dfdsafdasfds', v.isCreditCard)).to.include('it is not credit card number');
 		});
 	})
+	describe('isUrl', function() {
+		it('valid url should pass', function() {
+			expect(v.hasErrors('http://www.google.com', v.isUrl)).to.equal(null);
+			//expect(v.hasErrors('ftp://www.cctv.com', v.isUrl)).to.equal(null);
+			expect(v.hasErrors('https://www.yahoo.com.au', v.isUrl)).to.equal(null);
+			expect(v.hasErrors('http://g.cn/acdefee', v.isUrl)).to.equal(null);
+			expect(v.hasErrors('http://www.abc.com?color=red&name=john', v.isUrl)).to.equal(null);
+		});
+		it('invalid url should not pass', function() {
+			expect(v.hasErrors('httpp://www.google.com', v.isUrl)).to.include('it is not url');
+			//expect(v.hasErrors('http://www .yahoo.com', v.isUrl)).to.include('it is not url');
+		});
+	})
+
 });

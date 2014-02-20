@@ -284,6 +284,13 @@
 		},
 		function(name) {return m.sprintf('%s is not credit card number', name);}
 	));
+	ret.register('isUrl', ret.build(
+		function(value) {
+			var re = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+			return re.test(value);
+		},
+		function(name){return m.sprintf('%s is not url', name);}
+	));
 
 	return ret;
 });
