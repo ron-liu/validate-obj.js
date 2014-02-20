@@ -178,8 +178,11 @@ v.hasErrors('middle', v.isGender) // ==> ['it is not gender']
 * isDate
 * isString
 * isNumber
+* isEmail
+* isCreditCard
 * isIn
 * minLength
+* maxLength
 
 ## Progress
 The whole framework is done, the only missing is not enough built-in validators. I will add more soon. 
