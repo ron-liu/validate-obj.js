@@ -170,4 +170,14 @@ describe('built-in validators:', function() {
 		it('invalid should pass', function () {
 			expect(v.hasErrors(new Date(2014,1,21,10,30,0), v.isAfter([new Date(2014,1,21,10,31,0)]))).to.include('it is not after');
 		});
-	});});
+	});
+
+	describe('isBool', function() {
+		it('valid should pass', function () {
+			expect(v.hasErrors(true, v.isBool)).to.equal(null);
+		});
+		it('invalid should pass', function () {
+			expect(v.hasErrors('', v.isBool)).to.include('it is not bool');
+		});
+	});
+});

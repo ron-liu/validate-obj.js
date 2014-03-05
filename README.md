@@ -176,6 +176,7 @@ v.hasErrors('middle', v.isGender) // ==> ['it is not gender']
 ### Built-in validators
 * required
 * isDate
+* isBool
 * isString
 * isNumber
 * isEmail

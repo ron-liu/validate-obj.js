@@ -86,6 +86,9 @@
 		isString: function(s) {
 			return typeof s === 'string';
 		},
+		isBoolean: function(b) {
+			return typeof b === 'boolean';
+		},
 		isNumber: function(s) {
 			return typeof s === 'number';
 		},
@@ -235,6 +238,10 @@
 	ret.register('isDate', ret.build(
 		u.isDate,
 		function(name) {return m.sprintf('%s is not date', name);}
+	));
+	ret.register('isBool', ret.build(
+		u.isBoolean,
+		function(name) {return m.sprintf('%s is not bool', name);}
 	));
 	ret.register('isString', ret.build(
 		u.isString,
