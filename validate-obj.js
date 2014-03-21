@@ -12,6 +12,7 @@
 	}
 })('validate-obj', function (validator) {
 	var funcAttrName = '__validator-obj__';
+	var selfCrossValidatorPropName = 'selfCrossValidators';
 	var u = { // small set of underscore
 		each: function(collection, fn) {
 			if (u.isArray(collection)) {
@@ -160,6 +161,7 @@
 		hasErrors: function (target, validationExpression /*, name, errs*/) {
 			var name = arguments[2] || 'it'; // used to recursive call and calculate the full name
 			var errs = arguments[3] || []; // used to recursive call and collect the errors
+			var selfCrossValidators;
 
 			function _validate(expression, value, name) {
 				if (!u.isArray(expression)) expression = [expression];
@@ -190,7 +192,14 @@
 			}
 
 			if (!u.isObject(validationExpression)) throw m.sprintf("invalid validation expression: %s", name);
+			if (m.existy(validationExpression[selfCrossValidatorPropName])) {
+				u.each(u.isArray(validationExpression[selfCrossValidatorPropName]) ? validationExpression[selfCrossValidatorPropName] : [validationExpression[selfCrossValidatorPropName]], function(cross) {
+					var result = cross(target);
+					if (m.existy(result)) errs.push(result);
+				});
+			}
 			u.each(validationExpression, function (validators, propName) {
+				if (propName === selfCrossValidatorPropName) return;
 				errs = u.union(errs, ret.hasErrors((m.existy(target) ? target : {})[propName], validators, name + '.' + propName))
 			});
 
