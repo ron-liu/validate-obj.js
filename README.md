@@ -144,8 +144,31 @@ v.hasErrors(
 		items: [{ sku: v.isNumber, quantity: v.isNumber}]
 	}) // ==> ['it.items[0].sku is not number']
 ```
+### Validate logic which have multiple properties involved
+```
+	var schema = {
+		password: [v.isString, v.required],
+		matchedPassword: [v.isString, v.required],
+		selfCrossValidators : function(obj) {
+			if (obj.password !== obj.matchedPassword) return 'passwords do not match';
+			return undefined;
+		}
+	};
+	v.hasErrors({password:'123', matchedPassword: '123'}, schema) // => null
+	v.hasErrors({password:'123', matchedPassword: 'a23'}, schema) // => ['passwords do not match']
 
-### To extend, add custom validators
+	// The selfCrossValidators can also be array like the below
+	var schema = {
+        password: [v.isString, v.required],
+        matchedPassword: [v.isString, v.required],
+        selfCrossValidators : [function(obj) {
+            if (obj.password !== obj.matchedPassword) return 'passwords do not match';
+            return undefined;
+        }]
+    };
+```
+
+### Extend your custom validators
 * With auto error message
 
 ``` javascript
