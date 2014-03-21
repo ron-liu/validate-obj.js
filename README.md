@@ -144,8 +144,9 @@ v.hasErrors(
 		items: [{ sku: v.isNumber, quantity: v.isNumber}]
 	}) // ==> ['it.items[0].sku is not number']
 ```
+
 ### Validate logic which have multiple properties involved
-```
+``` javascript
 	var schema = {
 		password: [v.isString, v.required],
 		matchedPassword: [v.isString, v.required],
