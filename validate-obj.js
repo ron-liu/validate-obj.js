@@ -323,5 +323,12 @@
 		},
 		function(name) {return m.sprintf('%s is not after', name);}
 	));
+	ret.register('isObject', ret.build(
+		function(value, params) {
+			console.log (value);
+			return u.isObject(value)
+		},
+		function(name) {return m.sprintf('%s is not object', name);}
+	))
 	return ret;
 });

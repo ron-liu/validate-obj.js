@@ -180,4 +180,13 @@ describe('built-in validators:', function() {
 			expect(v.hasErrors('', v.isBool)).to.include('it is not bool');
 		});
 	});
+
+	describe('isObject', function() {
+		it ('valid should pass', function() {
+			expect(v.hasErrors({}, v.isObject)).to.equal(null);
+		})
+		it ('invalid should pass', function() {
+			expect(v.hasErrors('', v.isObject)).to.include('it is not object');
+		})
+	})
 });

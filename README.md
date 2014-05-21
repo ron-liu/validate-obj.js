@@ -211,6 +211,7 @@ v.hasErrors('middle', v.isGender) // ==> ['it is not gender']
 * isUrl
 * isBefore
 * isAfter
+* isObject
 
 ## Progress
 The whole framework is done, the only missing is not enough built-in validators. I will add more soon. 
