@@ -241,7 +241,7 @@
 	};
 
 	ret.register('required', ret.build(
-		function(value) {return m.existy(value);},
+		function(value) {return m.existy(value) && (value !== '');},
 		function(name) {return  name + ' is required';}
 	));
 	ret.register('isDate', ret.build(

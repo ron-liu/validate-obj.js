@@ -12,6 +12,9 @@ describe('built-in validators:', function() {
 		it ('existed prop', function() {
 			expect(v.hasErrors(undefined, v.required)).to.include('it is required');
 		})
+		it ('empty string should treated as not qualified for required', function(){
+			expect(v.hasErrors('', v.required)).to.include('it is required');
+		})
 	});
 
 	describe('isDate:', function() {
