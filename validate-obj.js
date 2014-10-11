@@ -309,7 +309,6 @@
 	));
 	ret.register('isBefore', ret.build(
 		function(value, params) {
-			console.log(value);
 			if(!u.isArray(params) || params.length !==1 || !u.isDate(u.first(params))) throw m.sprintf('isBefore must have one date in the params array');
 			return value < u.first(params);
 		},
@@ -317,7 +316,6 @@
 	));
 	ret.register('isAfter', ret.build(
 		function(value, params) {
-			console.log(value);
 			if(!u.isArray(params) || params.length !==1 || !u.isDate(u.first(params))) throw m.sprintf('isAfter must have one date in the params array');
 			return value > u.first(params);
 		},
@@ -325,7 +323,6 @@
 	));
 	ret.register('isObject', ret.build(
 		function(value, params) {
-			console.log (value);
 			return u.isObject(value)
 		},
 		function(name) {return m.sprintf('%s is not object', name);}
