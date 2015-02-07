@@ -231,7 +231,7 @@
 			return function(value, name, err, params) {
 				err = err || errFn;
 				try {
-					return validateFn(value, params) ? null : (u.isString(err) ? err : err(name, params));
+					return validateFn(value, params) ? null : (u.isString(err) ? err : err(name, params, value));
 				}
 				catch(e) {
 					throw m.sprintf('%s: %s', name, e);
