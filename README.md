@@ -80,7 +80,7 @@ var errs = v.hasErrors(myUserForm, validationExpression);
 var v = require('validate-obj'); //load the library, to make it short, I will not include it in the following examples
 
 // target: the object going to be validated
-// validationExpression: the validation defination indicating how to validat
+// validationExpression: the validation defination indicating how to validate
 // return value: null means no errors or array of error string
 v.hasErrors(target, validationExpression)
 ```
