@@ -81,7 +81,7 @@ var v = require('validate-obj'); //load the library, to make it short, I will no
 
 // target: the object going to be validated
 // validationExpression: the validation defination indicating how to validat
-// erturn value: null means no errors or array of error string
+// return value: null means no errors or array of error string
 v.hasErrors(target, validationExpression)
 ```
 	
