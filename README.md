@@ -1,3 +1,5 @@
+This library `validate-obj` was built mainly for validation for REST APIs. Since there are many other better ways can achieve the same goal like `swagger` or `graphql`, obsolete this library, please do NOT use it any more.
+
 ## What is validate-obj?
 **validate-obj** is a javascript validation framework, easy to validate object or form, and is very easy to extend.
 **validate-obj** mainly for node.js server-side, but also work for front-end.
